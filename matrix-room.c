@@ -581,6 +581,7 @@ void matrix_room_handle_timeline_event(PurpleConversation *conv,
     JsonObject *json_unsigned_obj;
     const gchar *room_id, *msg_body, *msg_type;
     gchar *tmp_body = NULL;
+    gchar *escaped_body = NULL;
     PurpleMessageFlags flags;
 
     const gchar *sender_display_name;
@@ -648,13 +649,14 @@ void matrix_room_handle_timeline_event(PurpleConversation *conv,
         tmp_body = g_strdup_printf("/me %s", msg_body);
     }
     flags = PURPLE_MESSAGE_RECV;
-
+    escaped_body = purple_markup_escape_text(tmp_body ? tmp_body : msg_body, -1);
+    g_free(tmp_body);
     purple_debug_info("matrixprpl", "got message from %s in %s\n", sender_id,
             room_id);
     serv_got_chat_in(conv->account->gc, g_str_hash(room_id),
-            sender_display_name, flags, tmp_body ? tmp_body : msg_body,
+            sender_display_name, flags, escaped_body,
             timestamp / 1000);
-    g_free(tmp_body);
+    g_free(escaped_body);
 }
 
 
